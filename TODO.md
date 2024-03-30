@@ -1,0 +1,2 @@
+- Accept also the `application/x-www-form-urlencoded` webhook payload
+- Accept also empty webhook secrets

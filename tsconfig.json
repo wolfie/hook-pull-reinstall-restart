@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "esModuleInterop": true,
+    "noEmit": true,
+    "strict": true,
+    "checkJs": true,
+    "allowJs": true
+  }
+}
