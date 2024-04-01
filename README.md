@@ -19,13 +19,17 @@ This app runner
 
 ## To run...
 
-On your server, clone your project repository from GitHub, and then run one of the following commands:
+Go to https://smee.io/ and press the "Start a new channel" button. Add the URL provided as a webhook for your repository in GitHub (Settings > Webhooks > Add webhook > Payload URL). Then, copy the alphanumeric part of the Smee.io URL. You'll provide that ID to the `hook-pull-reinstall-restart` interactive prompt.
+
+In your server's terminal, clone your project repository from GitHub, and then run one of the following commands:
 
 ```bash
 pnpm dlx hook-pull-reinstall-restart -p  # for pnpm
 yarn dlx hook-pull-reinstall-restart -p  # for yarn
 npx hook-pull-reinstall-restart -p       # for npm
 ```
+
+Then answer the questions in the prompt. The "Smee.io channel id" is the alphanumeric part of the URL provided.
 
 _Technically_ it doesn't matter if this command matches whichever package manager you use for your project. But preferences are preferences.
 

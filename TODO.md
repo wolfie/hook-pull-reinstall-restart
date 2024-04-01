@@ -1,2 +1,3 @@
 - Accept also the `application/x-www-form-urlencoded` webhook payload
 - Accept also empty webhook secrets
+- Accept both full smee.io urls and only the alphanumeric part (this'll streamline the setup quite a bit)
