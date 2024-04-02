@@ -60,6 +60,7 @@ After this, the branch will be pulled, newest project dependencies will be insta
 If the webhook is set up correctly, the next time any updates happen in the main branch of your GitHub repository, the project will be killed, and everything will be restarted.
 
 ```
+🆕 [WebHook] [2024-04-02T15:30:42.187Z] 1 new commit(s) to wolfie/my-project@master
 ✨ Killing child process
 ✨ Waiting 500ms
 ✨ Running "git pull"
