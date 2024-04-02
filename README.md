@@ -9,29 +9,65 @@ This app runner
 3. Runs the application
 4. Listens to updates in your remote main branch and repeats
 
-## Project Requirements
+## Requirements
 
-- A `package.json` file with a `start` script that starts the project
-- A GitHub repository with a webhook that
-  - sends at least the `push` event
-  - sends with `application/json` Content type
-  - a non-empty secret
+- Node 20.10 or later
+- A cloned GitHub repository
+- `package.json` file with a `start` script that runs your project
+- A lockfile matching the `package.json`
 
-## To run...
+## Get Started
 
-Go to https://smee.io/ and press the "Start a new channel" button. Add the URL provided as a webhook for your repository in GitHub (Settings > Webhooks > Add webhook > Payload URL). Then, copy the alphanumeric part of the Smee.io URL. You'll provide that ID to the `hook-pull-reinstall-restart` interactive prompt.
+First, go to https://smee.io/ and press the "Start a new channel" button. Make note of the URL provided.
 
-In your server's terminal, clone your project repository from GitHub, and then run one of the following commands:
+Then create a new webhook for your GitHub project with that URL. (Repository > Settings > Webhooks > Add webhook). Make sure that
 
-```bash
-pnpm dlx hook-pull-reinstall-restart -p  # for pnpm
-yarn dlx hook-pull-reinstall-restart -p  # for yarn
-npx hook-pull-reinstall-restart -p       # for npm
+- The content type is `application/json`,
+- A secret is set, and
+- At least the `push` event is sent.
+
+Finally, you can run the command `npx hook-pull-reinstall-restart`, and enter the smee.io channel URL when prompted:
+
+```
+> npx hook-pull-reinstall-restart
+✔ Do you have a Smee.io channel already? › Yes
+✔ Smee.io channel URL … https://smee.io/aBcDeF1234567890
+✔ Github project secret … myProjectSecret123
+✔ Main branch name … main
+✔ Save answers? … yes
+✨ Saving answers to /home/wolfie/dev/my-project/.hprrrc
 ```
 
-Then answer the questions in the prompt. The "Smee.io channel id" is the alphanumeric part of the URL provided.
+_Technically it doesn't matter if this command matches whichever package manager you use for your project. But preferences are preferences, so feel free to use `yarn dlx` or `pnpm dlx` instead of `npx`._
 
-_Technically_ it doesn't matter if this command matches whichever package manager you use for your project. But preferences are preferences.
+After this, the branch will be pulled, newest project dependencies will be installed, and the project started.
+
+```
+✨ [Smee] Connecting to https://smee.io/aBcDeF1234567890
+☑️ [Smee] Connected
+✨ Running "git pull"
+🔊  Already up to date.
+✨ Running "pnpm install"
+🔊  Lockfile is up to date, resolution step is skipped
+🔊  Already up to date
+🔊
+🔊  Done in 422ms
+✨ Running "echo "works""
+✨ Child process running on PID 36658
+🔊  works
+```
+
+If the webhook is set up correctly, the next time any updates happen in the main branch of your GitHub repository, the project will be killed, and everything will be restarted.
+
+```
+✨ Killing child process
+✨ Waiting 500ms
+✨ Running "git pull"
+🔊  Already up to date.
+✨ Running "pnpm install"
+
+...and so on...
+```
 
 ## CLI Options
 
@@ -41,6 +77,16 @@ _Technically_ it doesn't matter if this command matches whichever package manage
 --prod, -p
     Omit devDependencies during package installation
 ```
+
+## Environment Variables
+
+The environment variables used are:
+
+- `EVENT_SOURCE_URL`: The HTTP(S) address to the (smee.io) service that sends the github webhook events
+- `GITHUB_PROJECT_SECRET`: The [webhook's secret](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#creating-a-secret-token) string
+- `MAIN_BRANCH_NAME`: The name of the Git repository's main branch. This branch is what will trigger the cycle. Usually `master` or `main`.
+
+These values are written into `.hprrrc` by the interactive prompt if asked to. If the file exists, the script will use the values from there as defaults for environment variables (convenient with the `--envs` flag).
 
 ## Things of Note
 
