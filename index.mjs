@@ -32,10 +32,10 @@ if ((await spawn("git", undefined, { suppressOutput: true }).promise) !== 1) {
 }
 const packageManagerCommand = await getPackageManagerCommand();
 const startCommand = await getStartCommand();
-const { GITHUB_PROJECT_SECRET, MAIN_BRANCH_NAME, EVENT_SOURCE_URL } =
+const { GITHUB_WEBHOOK_SECRET, MAIN_BRANCH_NAME, EVENT_SOURCE_URL } =
   await getEnvs(args.flags.envs);
 
-const isValidBody = createIsValidBody(GITHUB_PROJECT_SECRET);
+const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
 await connectToSmee({
   eventSourceUrl: EVENT_SOURCE_URL,
   onConnecting: ({ source }) =>

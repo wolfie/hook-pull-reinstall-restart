@@ -32,7 +32,7 @@ Finally, you can run the command `npx hook-pull-reinstall-restart`, and enter th
 > npx hook-pull-reinstall-restart
 ✔ Do you have a Smee.io channel already? › Yes
 ✔ Smee.io channel URL … https://smee.io/aBcDeF1234567890
-✔ Github project secret … myProjectSecret123
+✔ Github webhook secret … myProjectSecret123
 ✔ Main branch name … main
 ✔ Save answers? … yes
 ✨ Saving answers to /home/wolfie/dev/my-project/.hprrrc
@@ -84,7 +84,7 @@ If the webhook is set up correctly, the next time any updates happen in the main
 The environment variables used are:
 
 - `EVENT_SOURCE_URL`: The HTTP(S) address to the (smee.io) service that sends the github webhook events
-- `GITHUB_PROJECT_SECRET`: The [webhook's secret](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#creating-a-secret-token) string
+- `GITHUB_WEBHOOK_SECRET`: The [webhook's secret](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#creating-a-secret-token) string
 - `MAIN_BRANCH_NAME`: The name of the Git repository's main branch. This branch is what will trigger the cycle. Usually `master` or `main`.
 
 These values are written into `.hprrrc` by the interactive prompt if asked to. If the file exists, the script will use the values from there as defaults for environment variables (convenient with the `--envs` flag).
