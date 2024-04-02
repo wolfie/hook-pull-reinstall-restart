@@ -46,7 +46,6 @@ await connectToSmee({
   onError: (err) => log.error("[Smee]", err),
   onEvent: (headers, body) => {
     const signature = headers["x-hub-signature-256"];
-    console.log(signature);
     if (!signature) {
       return log.error(
         `[WebHook] [${new Date().toISOString()}] Received payload without a secret`,
