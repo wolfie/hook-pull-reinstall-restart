@@ -32,13 +32,12 @@ if ((await spawn("git", undefined, { suppressOutput: true }).promise) !== 1) {
 }
 const packageManagerCommand = await getPackageManagerCommand();
 const startCommand = await getStartCommand();
-const { GITHUB_PROJECT_SECRET, MAIN_BRANCH_NAME, SMEE_ID } = await getEnvs(
-  args.flags.envs,
-);
+const { GITHUB_PROJECT_SECRET, MAIN_BRANCH_NAME, EVENT_SOURCE_URL } =
+  await getEnvs(args.flags.envs);
 
 const isValidBody = createIsValidBody(GITHUB_PROJECT_SECRET);
 await connectToSmee({
-  smeeChannelId: SMEE_ID,
+  eventSourceUrl: EVENT_SOURCE_URL,
   onConnecting: ({ source }) =>
     log.info(`[Smee] Connecting to ${kleur.bold().yellow(source)}`),
   onConnected: () =>
