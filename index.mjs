@@ -6,10 +6,14 @@ import kleur from 'kleur';
 import connectToSmee from './lib/smee/connectToSmee.mjs';
 import spawn from './lib/spawn.mjs';
 import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
-import sleep from './lib/sleep.mjs';
+import createTimeout from './lib/createTimeout.mjs';
 import getStartCommand from './lib/node/getStartCommand.mjs';
 import * as log from './lib/log.mjs';
 import createIsValidBody from './lib/github/createIsValidBody.mjs';
+import _treeKill from 'tree-kill';
+import util from 'util';
+
+const treeKill = util.promisify(_treeKill);
 
 const args = meow(
   `
@@ -76,14 +80,26 @@ await connectToSmee({
 
 // Main loop
 
+const KILL_TIMEOUT = 1000;
+
 /** @type {ReturnType<typeof spawn>|undefined} */
 let spawnResult;
 const restart = async () => {
   if (spawnResult) {
     log.info('Killing child process');
-    spawnResult.abortController.abort();
-    log.info('Waiting 500ms');
-    await sleep(500);
+    const timeout = createTimeout(1000);
+    spawnResult.child.on('exit', timeout.cancel);
+    if (spawnResult.child.pid) {
+      await treeKill(spawnResult.child.pid);
+    } else {
+      spawnResult.child.kill();
+    }
+    const timeoutResult = await timeout.timeout;
+    if (timeoutResult === 'timeout') {
+      throw new Error(
+        `Child process (PID ${spawnResult.child.pid}) did not die within ${KILL_TIMEOUT / 1000} second(s)`,
+      );
+    }
   }
 
   log.info(`Running "${kleur.bold().yellow('git pull')}"`);
@@ -111,15 +127,19 @@ const restart = async () => {
   );
 };
 
-process.on('unhandledRejection', (e) => {
+/**
+ * @param {any} e
+ */
+const handleUnhandled = async (e) => {
   console.error(e);
-  spawnResult?.abortController.abort();
+  if (spawnResult?.child.pid) {
+    await treeKill(spawnResult.child.pid);
+  } else {
+    spawnResult?.child.kill();
+  }
   process.exit(1);
-});
-process.on('uncaughtException', (e) => {
-  console.error(e);
-  spawnResult?.abortController.abort();
-  process.exit(1);
-});
+};
+process.on('unhandledRejection', handleUnhandled);
+process.on('uncaughtException', handleUnhandled);
 
 restart();
