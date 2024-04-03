@@ -13,6 +13,9 @@ import createIsValidBody from './lib/github/createIsValidBody.mjs';
 import _treeKill from 'tree-kill';
 import util from 'util';
 
+// Trying out whether a shell is a huge overhead
+const USE_SHELL = true;
+
 const treeKill = util.promisify(_treeKill);
 
 const args = meow(
@@ -121,7 +124,9 @@ const restart = async () => {
   if (installExitCode !== 0) process.exit(1);
 
   log.info(`Running "${kleur.bold().yellow(startCommand.original)}"`);
-  spawnResult = spawn(...startCommand.spawnArgs);
+  spawnResult = USE_SHELL
+    ? spawn(startCommand.original, undefined, { shell: true })
+    : spawn(...startCommand.spawnArgs);
   log.info(
     `Child process running on PID ${kleur.bold().yellow(spawnResult.child.pid ?? '[undefined]')}`,
   );
