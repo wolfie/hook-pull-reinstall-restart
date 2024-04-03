@@ -41,7 +41,7 @@ await connectToSmee({
   onConnecting: ({ source }) =>
     log.info(`[Smee] Connecting to ${kleur.bold().yellow(source)}`),
   onConnected: () =>
-    console.log(`☑️ ${kleur.bold().green('[Smee]')} Connected`),
+    console.log(`✅ ${kleur.bold().green('[Smee]')} Connected`),
   onError: (err) => log.error('[Smee]', err),
   onEvent: (headers, body) => {
     const signature = headers['x-hub-signature-256'];

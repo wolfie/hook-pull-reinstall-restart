@@ -44,7 +44,7 @@ After this, the branch will be pulled, newest project dependencies will be insta
 
 ```
 ✨ [Smee] Connecting to https://smee.io/aBcDeF1234567890
-☑️ [Smee] Connected
+✅ [Smee] Connected
 ✨ Running "git pull"
 🔊  Already up to date.
 ✨ Running "pnpm install"
