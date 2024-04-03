@@ -1,3 +1,7 @@
+# 0.0.5
+
+- Fix issue where processes that exit between restarts would lead to false errors
+
 # 0.0.4
 
 - Use `tree-kill` to robustly kill child process tree.

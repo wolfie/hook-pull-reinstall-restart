@@ -90,23 +90,32 @@ const KILL_TIMEOUT = 1000;
 
 /** @type {ReturnType<typeof spawn>|undefined} */
 let spawnResult;
-const restart = async () => {
-  if (spawnResult) {
-    log.info('Killing child process');
-    const timeout = createTimeout(1000);
-    spawnResult.child.on('exit', timeout.cancel);
-    if (spawnResult.child.pid) {
-      await treeKill(spawnResult.child.pid);
-    } else {
-      spawnResult.child.kill();
-    }
-    const timeoutResult = await timeout.timeout;
-    if (timeoutResult === 'timeout') {
-      throw new Error(
-        `Child process (PID ${spawnResult.child.pid}) did not die within ${KILL_TIMEOUT / 1000} second(s)`,
-      );
-    }
+const killChildProcessIfNeeded = async () => {
+  if (!spawnResult) return;
+  if (spawnResult.child.exitCode !== null)
+    return log.info('child process had already exited.');
+
+  // `null` means it's still running, otherwise no need to kill it.
+  log.info('Killing child process');
+  const timeout = createTimeout(1000);
+  spawnResult.child.on('exit', timeout.cancel);
+
+  if (spawnResult.child.pid) {
+    await treeKill(spawnResult.child.pid);
+  } else {
+    spawnResult.child.kill();
   }
+
+  const timeoutResult = await timeout.promise;
+  if (timeoutResult === 'timeout') {
+    throw new Error(
+      `Child process (PID ${spawnResult.child.pid}) did not die within ${KILL_TIMEOUT / 1000} second(s)`,
+    );
+  }
+};
+
+const restart = async () => {
+  await killChildProcessIfNeeded();
 
   log.info(`Running "${kleur.bold().yellow('git pull')}"`);
   const gitPullExitCode = await spawn('git', ['pull']).promise;

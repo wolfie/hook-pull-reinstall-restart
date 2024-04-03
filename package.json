@@ -1,6 +1,6 @@
 {
   "name": "hook-pull-reinstall-restart",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "ISC",
   "main": "index.mjs",
   "engines": {
@@ -14,7 +14,7 @@
   ],
   "repository": "github:wolfie/hook-pull-reinstall-restart",
   "scripts": {
-    "start": "echo \"works\""
+    "start": "npx -y http-serve"
   },
   "devDependencies": {
     "@types/eventsource": "^1.1.15",
