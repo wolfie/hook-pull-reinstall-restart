@@ -7,13 +7,13 @@ import connectToSmee from './lib/smee/connectToSmee.mjs';
 import spawn from './lib/spawn.mjs';
 import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
 import createTimeout from './lib/createTimeout.mjs';
-import getStartCommand from './lib/node/getStartCommand.mjs';
+import getScriptCommand from './lib/node/getScriptCommand.mjs';
 import * as log from './lib/log.mjs';
 import createIsValidBody from './lib/github/createIsValidBody.mjs';
 import _treeKill from 'tree-kill';
 import util from 'util';
 
-// Trying out whether a shell is a huge overhead
+// Trying out whether a shell is a huge overhead.
 const USE_SHELL = true;
 
 const treeKill = util.promisify(_treeKill);
@@ -38,9 +38,12 @@ if ((await spawn('git', undefined, { suppressOutput: true }).promise) !== 1) {
   process.exit(1);
 }
 const packageManagerCommand = await getPackageManagerCommand();
-const startCommand = await getStartCommand();
-const { GITHUB_WEBHOOK_SECRET, MAIN_BRANCH_NAME, EVENT_SOURCE_URL } =
-  await getEnvs(args.flags.envs);
+const {
+  GITHUB_WEBHOOK_SECRET,
+  MAIN_BRANCH_NAME,
+  EVENT_SOURCE_URL,
+  START_SCRIPT,
+} = await getEnvs(args.flags.envs);
 
 const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
 await connectToSmee({
@@ -123,6 +126,7 @@ const restart = async () => {
   ).promise;
   if (installExitCode !== 0) process.exit(1);
 
+  const startCommand = await getScriptCommand(START_SCRIPT);
   log.info(`Running "${kleur.bold().yellow(startCommand.original)}"`);
   spawnResult = USE_SHELL
     ? spawn(startCommand.original, undefined, { shell: true })
