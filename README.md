@@ -78,6 +78,8 @@ If the webhook is set up correctly, the next time any updates happen in the main
     Skip interactive prompts on startup and use environment variables instead
 --prod, -p
     Omit devDependencies during package installation
+--verbose, -v
+    Increase logging
 ```
 
 ## Environment Variables

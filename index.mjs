@@ -23,12 +23,15 @@ const args = meow(
     --envs, -e
         Skip interactive prompts on startup and use environment variables instead
     --prod, -p
-        Omit devDependencies during package installation`,
+        Omit devDependencies during package installation
+    --verbose, -v
+        Increase logging`,
   {
     importMeta: import.meta,
     flags: {
       envs: { type: 'boolean', shortFlag: 'e', default: false },
       prod: { type: 'boolean', shortFlag: 'p', default: false },
+      verbose: { type: 'boolean', shortFlag: 'v', default: false },
     },
   },
 );
@@ -54,6 +57,9 @@ await connectToSmee({
     console.log(`✅ ${kleur.bold().green('[Smee]')} Connected`),
   onError: (err) => log.error('[Smee]', err),
   onEvent: (headers, body) => {
+    if (args.flags.verbose)
+      log.info(`[WebHook] [${new Date().toISOString()}] ${body}`);
+
     const signature = headers['x-hub-signature-256'];
     if (!signature) {
       return log.error(
@@ -67,6 +73,16 @@ await connectToSmee({
     }
     if (headers['x-github-event'] !== 'push') {
       // unhandled event
+      if (args.flags.verbose) {
+        if (headers['x-github-event'])
+          log.info(
+            `[WebHook] [${new Date().toISOString()}] unhandled event: ${headers['x-github-event']}`,
+          );
+        else
+          log.info(
+            `[WebHook] [${new Date().toISOString()}] no event in header`,
+          );
+      }
       return;
     }
 
