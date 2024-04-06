@@ -125,6 +125,7 @@ const restart = async () => {
     `Running "${kleur.bold().yellow(packageManagerCommand + ' install')}"` +
       (args.flags.prod ? ' with NODE_ENV="production"' : ''),
   );
+  /** @type {{env?:{NODE_ENV:'production'}}} */
   const options = {
     env: args.flags.prod ? { NODE_ENV: 'production' } : undefined,
   };
