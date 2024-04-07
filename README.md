@@ -89,8 +89,7 @@ The environment variables used are:
 - `EVENT_SOURCE_URL`: The HTTP(S) address to the (smee.io) service that sends the github webhook events
 - `GITHUB_WEBHOOK_SECRET`: The [webhook's secret](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#creating-a-secret-token) string
 - `MAIN_BRANCH_NAME`: The name of the Git repository's main branch. This branch is what will trigger the cycle. Usually `master` or `main`.
-- _(Optional)_ `START_SCRIPT`: The script in `package.json` to run when starting your app. If unset, defaults to "`start`".
-- _(Optional)_ `AFTER_FIRST_SCRIPT`: The script in `package.json` to run after `START_SCRIPT` has executed for the first time (regardless of success or failure). If unset, no command is executed.
+- `START_SCRIPT`: The script in `package.json` to run when starting your app. Defaults to "`start`".
 
 These values are written into `.hprrrc` by the interactive prompt if asked to. If the file exists, the script will use the values from there as defaults for environment variables (convenient with the `--envs` flag).
 
