@@ -12,6 +12,8 @@ import * as log from './lib/log.mjs';
 import createIsValidBody from './lib/github/createIsValidBody.mjs';
 import _treeKill from 'tree-kill';
 import util from 'util';
+import onFileChange from './lib/onFileChange.mjs';
+import path from 'path';
 
 // Trying out whether a shell is a huge overhead.
 const USE_SHELL = true;
@@ -46,6 +48,7 @@ const {
   MAIN_BRANCH_NAME,
   EVENT_SOURCE_URL,
   START_SCRIPT,
+  ONCE_SCRIPT,
 } = await getEnvs(args.flags.envs);
 
 const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
@@ -176,5 +179,26 @@ const handleUnhandled = async (e) => {
 };
 process.on('unhandledRejection', handleUnhandled);
 process.on('uncaughtException', handleUnhandled);
+
+if (ONCE_SCRIPT) {
+  const file = path.resolve(process.cwd(), '.hprrrc');
+  if (args.flags.verbose)
+    log.info(
+      `Waiting for ${kleur.bold().yellow(file)} to change to run "${kleur.bold().yellow(ONCE_SCRIPT)}"...`,
+    );
+  onFileChange(file).then(async () => {
+    if (args.flags.verbose)
+      log.info(`Triggering "${kleur.bold().yellow(ONCE_SCRIPT)}" once`);
+
+    const onceCommand = await getScriptCommand(ONCE_SCRIPT);
+    log.info(`Running "${kleur.bold().yellow(onceCommand.original)}"`);
+    spawnResult = USE_SHELL
+      ? spawn(onceCommand.original, undefined, { shell: true })
+      : spawn(...onceCommand.spawnArgs);
+    log.info(
+      `Child process running on PID ${kleur.bold().yellow(spawnResult.child.pid ?? '[undefined]')}`,
+    );
+  });
+}
 
 restart();
