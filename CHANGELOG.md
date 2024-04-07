@@ -1,3 +1,9 @@
+# 0.0.6
+
+- Trim all text inputs in prompts
+- Add a `--verbose` flag
+- Add support for running a command exactly once via the `ONCE_SCRIPT` environment variable
+
 # 0.0.5
 
 - Fix issue where processes that exit between restarts would lead to false errors
