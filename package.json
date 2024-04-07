@@ -14,7 +14,8 @@
   ],
   "repository": "github:wolfie/hook-pull-reinstall-restart",
   "scripts": {
-    "start": "npx -y http-serve"
+    "start": "npx -y http-serve",
+    "after-first": "echo \"After first\""
   },
   "devDependencies": {
     "@types/eventsource": "^1.1.15",

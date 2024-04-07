@@ -5,5 +5,9 @@
   - Step 2: Remove from code
 - Make sure that we're on `MAIN_BRANCH_NAME`
 - Delete `USE_SHELL` after deciding whether should it remain on or off
+- Consider switching from Prompts to Inquirer
+  - Prompts's autocomplete has no onVerify and escape key doesn't cancel the form
+
+---
 
 - [done 2024-02-04] Accept both full smee.io urls and only the alphanumeric part (this'll streamline the setup quite a bit)

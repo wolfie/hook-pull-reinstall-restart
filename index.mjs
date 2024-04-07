@@ -46,6 +46,7 @@ const {
   MAIN_BRANCH_NAME,
   EVENT_SOURCE_URL,
   START_SCRIPT,
+  AFTER_FIRST_SCRIPT,
 } = await getEnvs(args.flags.envs);
 
 const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
@@ -177,4 +178,13 @@ const handleUnhandled = async (e) => {
 process.on('unhandledRejection', handleUnhandled);
 process.on('uncaughtException', handleUnhandled);
 
-restart();
+restart().then(async () => {
+  if (!AFTER_FIRST_SCRIPT) return;
+  const startCommand = await getScriptCommand(AFTER_FIRST_SCRIPT);
+  log.info(
+    `[first run] Running "${kleur.bold().yellow(startCommand.original)}"`,
+  );
+  spawnResult = USE_SHELL
+    ? spawn(startCommand.original, undefined, { shell: true })
+    : spawn(...startCommand.spawnArgs);
+});
