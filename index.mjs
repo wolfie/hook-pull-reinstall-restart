@@ -192,11 +192,11 @@ if (ONCE_SCRIPT) {
 
     const onceCommand = await getScriptCommand(ONCE_SCRIPT);
     log.info(`Running "${kleur.bold().yellow(onceCommand.original)}"`);
-    spawnResult = USE_SHELL
-      ? spawn(onceCommand.original, undefined, { shell: true })
-      : spawn(...onceCommand.spawnArgs);
+    const onceSpawnResult = spawn(onceCommand.original, undefined, {
+      shell: true,
+    });
     log.info(
-      `Child process running on PID ${kleur.bold().yellow(spawnResult.child.pid ?? '[undefined]')}`,
+      `Child process running on PID ${kleur.bold().yellow(onceSpawnResult.child.pid ?? '[undefined]')}`,
     );
   });
 }
