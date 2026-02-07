@@ -1,3 +1,19 @@
+# 1.0
+
+## Breaking Changes
+
+- **BREAKING:** Changed `--prod`/`-p` flag to `--dev`/`-d` with inverted logic
+- **BREAKING:** Changed `--envs`/`-e` flag to `--interactive`/`-i` with
+- **BREAKING:** Generalized terminology from Smee-specific to vendor-neutral; `EVENT_SOURCE_URL` must be a full URL now
+- **BREAKING:** Require Node 24 or later
+
+## Features
+
+- Complete TypeScript rewrite using Node 24's native type stripping
+- Upgrade to ESLint 10 with flat config system
+- Add quality check npm scripts
+- Added Claude-related files
+
 # 0.0.6
 
 - Trim all text inputs in prompts
