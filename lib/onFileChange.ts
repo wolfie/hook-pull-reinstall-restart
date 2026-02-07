@@ -1,10 +1,6 @@
 import fs from 'fs';
 
-/**
- * @param {string} path
- * @returns {Promise<void>}
- */
-const onFileChange = (path) =>
+const onFileChange = (path: string): Promise<void> =>
   new Promise((resolve) => {
     const watcher = fs.watch(path, (e) => {
       if (e !== 'change') return;

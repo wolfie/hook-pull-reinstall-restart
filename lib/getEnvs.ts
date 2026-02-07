@@ -4,36 +4,29 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import kleur from 'kleur';
-import * as log from './log.mjs';
-import createSmeeChannel from './smee/createSmeeChannel.mjs';
-import getScripts from './node/getScripts.mjs';
+import * as log from './log.ts';
+import createSmeeChannel from './smee/createSmeeChannel.ts';
+import getScripts from './node/getScripts.ts';
 
-/**
- * @typedef {object} Envs
- * @property {string} EVENT_SOURCE_URL
- * @property {string} GITHUB_WEBHOOK_SECRET
- * @property {string} MAIN_BRANCH_NAME
- * @property {string} START_SCRIPT
- * @property {string} ONCE_SCRIPT
- */
+type Envs = {
+  EVENT_SOURCE_URL: string;
+  GITHUB_WEBHOOK_SECRET: string;
+  MAIN_BRANCH_NAME: string;
+  START_SCRIPT: string;
+  ONCE_SCRIPT: string | undefined;
+};
 
 const DOTENV_PATH = path.resolve(process.cwd(), '.hprrrc');
 const DEFAULT_START_SCRIPT = 'start';
 
-/**
- * @param {string} envKey
- */
-const assert = (envKey) => {
+const assert = (envKey: string) => {
   if (!process.env[envKey]) {
     log.error(`${kleur.bold().yellow(envKey)} environment variable not set`);
     process.exit(1);
   }
 };
 
-/**
- * @returns {Envs}
- */
-const getOnlyEnvs = () => {
+const getOnlyEnvs = (): Envs => {
   assert('EVENT_SOURCE_URL');
   assert('GITHUB_WEBHOOK_SECRET');
   assert('MAIN_BRANCH_NAME');
@@ -45,41 +38,30 @@ const getOnlyEnvs = () => {
     ONCE_SCRIPT,
   } = process.env;
   return {
-    // @ts-ignore
-    EVENT_SOURCE_URL,
-    // @ts-ignore
-    GITHUB_WEBHOOK_SECRET,
-    // @ts-ignore
-    MAIN_BRANCH_NAME,
+    EVENT_SOURCE_URL: EVENT_SOURCE_URL!,
+    GITHUB_WEBHOOK_SECRET: GITHUB_WEBHOOK_SECRET!,
+    MAIN_BRANCH_NAME: MAIN_BRANCH_NAME!,
     START_SCRIPT,
-    // @ts-ignore
     ONCE_SCRIPT,
   };
 };
 
 const onCancel = () => process.exit(130);
 
-/**
- * @param {string|undefined} SMEE_ID
- * @param {string|undefined} GITHUB_PROJECT_SECRET
- * @returns {Promise<Envs>}
- */
 const askQuestions = async (
-  /** @deprecated */ SMEE_ID,
-  /** @deprecated */ GITHUB_PROJECT_SECRET,
-) => {
+  /** @deprecated */ SMEE_ID: string | undefined,
+  /** @deprecated */ GITHUB_PROJECT_SECRET: string | undefined,
+): Promise<Envs> => {
   const scriptChoices = await getScripts().then((scripts) =>
     Object.entries(scripts).map(
-      /** @returns {import('prompts').Choice} */
-      ([name, cmd]) => ({
+      ([name, cmd]): prompts.Choice => ({
         title: name,
         description: cmd,
       }),
     ),
   );
 
-  /** @type {prompts.Answers<"script">|undefined} */
-  let scriptQuestion;
+  let scriptQuestion: prompts.Answers<'script'> | undefined;
   // for some reason, `validate` doesn't work for autocomplete...
   while (
     !scriptQuestion ||
@@ -95,10 +77,9 @@ const askQuestions = async (
       },
       { onCancel },
     );
-  const START_SCRIPT = scriptQuestion.script;
+  const START_SCRIPT = scriptQuestion.script as string;
 
-  /** @type {prompts.Answers<"script">|undefined} */
-  let onceScriptQuestion;
+  let onceScriptQuestion: prompts.Answers<'script'> | undefined;
   const NONE = Symbol('none');
   // for some reason, `validate` doesn't work for autocomplete...
   while (
@@ -120,7 +101,9 @@ const askQuestions = async (
       { onCancel },
     );
   const ONCE_SCRIPT =
-    onceScriptQuestion.script === NONE ? undefined : onceScriptQuestion.script;
+    onceScriptQuestion.script === NONE
+      ? undefined
+      : (onceScriptQuestion.script as string);
 
   const smeeQuestion = await prompts(
     {
@@ -144,8 +127,7 @@ const askQuestions = async (
     { onCancel },
   );
 
-  /** @type {string} */
-  let EVENT_SOURCE_URL;
+  let EVENT_SOURCE_URL: string;
   if (smeeQuestion.createNew) {
     EVENT_SOURCE_URL = await createSmeeChannel();
     log.info(
@@ -160,21 +142,17 @@ const askQuestions = async (
         initial: SMEE_ID
           ? `https://smee.io/${SMEE_ID}`
           : process.env.EVENT_SOURCE_URL,
-        format: (value) => value.trim(),
-        validate:
-          /**
-           * @param {string} value
-           */
-          (value) =>
-            value.trim().length === 16
-              ? 'Give the entire Smee.io URI'
-              : !value.trim().toLowerCase().startsWith('http')
-                ? 'Give the entire URI'
-                : true,
+        format: (value: string) => value.trim(),
+        validate: (value: string) =>
+          value.trim().length === 16
+            ? 'Give the entire Smee.io URI'
+            : !value.trim().toLowerCase().startsWith('http')
+              ? 'Give the entire URI'
+              : true,
       },
       { onCancel },
     );
-    EVENT_SOURCE_URL = answers.EVENT_SOURCE_URL;
+    EVENT_SOURCE_URL = answers.EVENT_SOURCE_URL as string;
   }
 
   const { GITHUB_WEBHOOK_SECRET, MAIN_BRANCH_NAME, saveAnswers } =
@@ -185,16 +163,16 @@ const askQuestions = async (
           name: 'GITHUB_WEBHOOK_SECRET',
           message: 'Github webhook secret',
           initial: GITHUB_PROJECT_SECRET || process.env.GITHUB_WEBHOOK_SECRET,
-          format: (value) => value.trim(),
-          validate: (value) => value.trim().length > 0,
+          format: (value: string) => value.trim(),
+          validate: (value: string) => value.trim().length > 0,
         },
         {
           type: 'text',
           name: 'MAIN_BRANCH_NAME',
           message: 'Main branch name',
           initial: process.env.MAIN_BRANCH_NAME ?? 'master',
-          format: (value) => value.trim(),
-          validate: (value) => value.trim().length > 0,
+          format: (value: string) => value.trim(),
+          validate: (value: string) => value.trim().length > 0,
         },
         {
           type: 'confirm',
@@ -225,18 +203,14 @@ const askQuestions = async (
 
   return {
     EVENT_SOURCE_URL,
-    GITHUB_WEBHOOK_SECRET,
-    MAIN_BRANCH_NAME,
+    GITHUB_WEBHOOK_SECRET: GITHUB_WEBHOOK_SECRET as string,
+    MAIN_BRANCH_NAME: MAIN_BRANCH_NAME as string,
     START_SCRIPT,
     ONCE_SCRIPT,
   };
 };
 
-/**
- * @param {boolean} useEnvs
- * @returns {Promise<Envs>}
- */
-const getEnvs = async (useEnvs) => {
+const getEnvs = async (useEnvs: boolean): Promise<Envs> => {
   configDotenv({ path: DOTENV_PATH });
 
   /** @deprecated */

@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
-import getEnvs from './lib/getEnvs.mjs';
+import getEnvs from './lib/getEnvs.ts';
 import meow from 'meow';
 import kleur from 'kleur';
-import connectToSmee from './lib/smee/connectToSmee.mjs';
-import spawn from './lib/spawn.mjs';
-import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
-import createTimeout from './lib/createTimeout.mjs';
-import getScriptCommand from './lib/node/getScriptCommand.mjs';
-import * as log from './lib/log.mjs';
-import createIsValidBody from './lib/github/createIsValidBody.mjs';
+import connectToSmee from './lib/smee/connectToSmee.ts';
+import spawn from './lib/spawn.ts';
+import getPackageManagerCommand from './lib/node/getPackageManagerCommand.ts';
+import createTimeout from './lib/createTimeout.ts';
+import getScriptCommand from './lib/node/getScriptCommand.ts';
+import * as log from './lib/log.ts';
+import createIsValidBody from './lib/github/createIsValidBody.ts';
 import _treeKill from 'tree-kill';
 import util from 'util';
-import onFileChange from './lib/onFileChange.mjs';
+import onFileChange from './lib/onFileChange.ts';
 import path from 'path';
 
 // Trying out whether a shell is a huge overhead.
@@ -107,8 +107,7 @@ await connectToSmee({
 
 const KILL_TIMEOUT = 1000;
 
-/** @type {ReturnType<typeof spawn>|undefined} */
-let spawnResult;
+let spawnResult: ReturnType<typeof spawn> | undefined;
 const killChildProcessIfNeeded = async () => {
   if (!spawnResult) return;
   if (spawnResult.child.exitCode !== null)
@@ -144,9 +143,8 @@ const restart = async () => {
     `Running "${kleur.bold().yellow(packageManagerCommand + ' install')}"` +
       (args.flags.prod ? ' with NODE_ENV="production"' : ''),
   );
-  /** @type {{env?:{NODE_ENV:'production'}}} */
   const options = {
-    env: args.flags.prod ? { NODE_ENV: 'production' } : undefined,
+    env: args.flags.prod ? { NODE_ENV: 'production' as const } : undefined,
   };
   const installExitCode = await spawn(
     packageManagerCommand,
@@ -165,10 +163,7 @@ const restart = async () => {
   );
 };
 
-/**
- * @param {any} e
- */
-const handleUnhandled = async (e) => {
+const handleUnhandled = async (e: any) => {
   console.error(e);
   if (spawnResult?.child.pid) {
     await treeKill(spawnResult.child.pid);

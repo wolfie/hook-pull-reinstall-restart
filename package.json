@@ -2,20 +2,26 @@
   "name": "hook-pull-reinstall-restart",
   "version": "0.0.6",
   "license": "ISC",
-  "main": "index.mjs",
+  "type": "module",
+  "main": "index.ts",
   "engines": {
     "node": ">=24",
     "pnpm": ">=10"
   },
-  "bin": "index.mjs",
+  "bin": "index.ts",
   "files": [
-    "index.mjs",
-    "lib/"
+    "index.ts",
+    "lib/",
+    "*.d.ts"
   ],
   "repository": "github:wolfie/hook-pull-reinstall-restart",
   "scripts": {
     "start": "touch .hprrrc; npx -y http-serve",
-    "once": "echo \"Triggered once!\""
+    "once": "echo \"Triggered once!\"",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm run format && pnpm run lint && pnpm run typecheck"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

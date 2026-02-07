@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
-import * as log from '../log.mjs';
+import * as log from '../log.ts';
 
-const getPackageManager = async () => {
+const getPackageManager = async (): Promise<string> => {
   const dir = await fs.readdir(process.cwd());
   const result = {
     isPnpm: dir.includes('pnpm-lock.yaml'),

@@ -11,10 +11,12 @@ This app runner
 
 ## Requirements
 
-- Node 24 or later
+- Node 24 or later (required for native TypeScript support)
 - A cloned GitHub repository
 - `package.json` file with a `start` script that runs your project
 - A lockfile matching the `package.json`
+
+**Note:** This project is written in TypeScript and uses Node 24's native type stripping - no compilation step needed.
 
 ## Get Started
 

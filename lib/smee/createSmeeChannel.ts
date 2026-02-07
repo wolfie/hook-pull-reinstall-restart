@@ -1,6 +1,6 @@
-import * as log from '../log.mjs';
+import * as log from '../log.ts';
 
-const createSmeeChannel = async () => {
+const createSmeeChannel = async (): Promise<string> => {
   const response = await fetch('https://smee.io/new', {
     method: 'HEAD',
     redirect: 'manual',

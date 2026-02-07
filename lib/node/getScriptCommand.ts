@@ -1,18 +1,13 @@
 import path from 'path';
-import * as log from '../log.mjs';
-import getScripts from './getScripts.mjs';
+import * as log from '../log.ts';
+import getScripts from './getScripts.ts';
 
 const PACKAGE_JSON_PATH = path.resolve(process.cwd(), 'package.json');
 const QUOTE_SPLIT_REGEX = /[^\s"]+|"([^"]*)"/gi;
 
-/**
- * @param {string} str
- */
-const splitWithQuotes = (str) => {
-  /** @type {string[]} */
-  const results = [];
-  /** @type {RegExpExecArray | null} */
-  let match = null;
+const splitWithQuotes = (str: string): string[] => {
+  const results: string[] = [];
+  let match: RegExpExecArray | null = null;
   do {
     match = QUOTE_SPLIT_REGEX.exec(str);
     if (match != null) {
@@ -22,11 +17,12 @@ const splitWithQuotes = (str) => {
   return results;
 };
 
-/**
- * @param {string} scriptName
- * @returns {Promise<{original:string,spawnArgs:[processName:string,args:string[]]}>}
- */
-const getScriptCommand = (scriptName) =>
+type ScriptCommand = {
+  original: string;
+  spawnArgs: [processName: string, args: string[]];
+};
+
+const getScriptCommand = (scriptName: string): Promise<ScriptCommand> =>
   getScripts()
     .then((scripts) => {
       if (!(scriptName in scripts)) {
@@ -36,7 +32,7 @@ const getScriptCommand = (scriptName) =>
       const [processName, ...args] = splitWithQuotes(cmd);
       return {
         original: cmd,
-        spawnArgs: [processName, args],
+        spawnArgs: [processName, args] as [string, string[]],
       };
     })
     .catch((e) => {
@@ -46,10 +42,6 @@ const getScriptCommand = (scriptName) =>
       } else {
         throw e;
       }
-
-      /** @type {any} -- typecheck gets confused, so this makes it happy */
-      const a = null;
-      return a;
     });
 
 export default getScriptCommand;

@@ -1,15 +1,7 @@
 import crypto from 'crypto';
 
-/**
- * @param {string} secret The Webhook secret
- */
 const createIsValidBody =
-  (secret) =>
-  /**
-   * @param {string} headerSignature The `x-hub-signature-256` value
-   * @param {string} body The webhook body
-   */
-  (headerSignature, body) => {
+  (secret: string) => (headerSignature: string, body: string) => {
     const signature = crypto
       .createHmac('sha256', secret)
       .update(body)

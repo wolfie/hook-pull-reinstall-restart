@@ -1,13 +1,8 @@
-/**
- * @param {number} ms
- */
-const createTimeout = (ms) => {
-  /** @type {()=>void} */
-  let cancel = () => {
+const createTimeout = (ms: number) => {
+  let cancel: () => void = () => {
     throw new Error('Unexpected orphan cancel');
   };
-  /** @type {Promise<'success'|'timeout'>} */
-  const promise = new Promise((resolve) => {
+  const promise: Promise<'success' | 'timeout'> = new Promise((resolve) => {
     cancel = () => resolve('success');
     setTimeout(() => resolve('timeout'), ms);
   });
