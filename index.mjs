@@ -6,16 +6,11 @@ import kleur from 'kleur';
 import connectToSmee from './lib/smee/connectToEventSource.mjs';
 import spawn from './lib/spawn.mjs';
 import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
-import createTimeout from './lib/createTimeout.mjs';
 import getScriptCommand from './lib/node/getScriptCommand.mjs';
 import * as log from './lib/log.mjs';
-import createIsValidBody from './lib/github/createIsValidBody.mjs';
-import _treeKill from 'tree-kill';
-import util from 'util';
+import createWebhookHandler from './lib/github/createWebhookHandler.mjs';
 import onFileChange from './lib/onFileChange.mjs';
 import path from 'path';
-
-const treeKill = util.promisify(_treeKill);
 
 const args = meow(
   `
@@ -48,90 +43,12 @@ const {
   ONCE_SCRIPT,
 } = await getEnvs(args.flags.interactive);
 
-const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
-await connectToSmee({
-  eventSourceUrl: EVENT_SOURCE_URL,
-  onConnecting: ({ source }) =>
-    log.info(`[Event Source] Connecting to ${kleur.bold().yellow(source)}`),
-  onConnected: () =>
-    console.log(`✅ ${kleur.bold().green('[Event Source]')} Connected`),
-  onError: (err) => log.error('[Event Source]', err),
-  onEvent: (headers, body) => {
-    if (args.flags.verbose)
-      log.info(`[WebHook] [${new Date().toISOString()}] ${body}`);
-
-    const signature = headers['x-hub-signature-256'];
-    if (!signature) {
-      return log.error(
-        `[WebHook] [${new Date().toISOString()}] Received payload without a secret`,
-      );
-    }
-    if (!isValidBody(signature, body)) {
-      return log.error(
-        `[WebHook] [${new Date().toISOString()}] Received payload with incorrect secret`,
-      );
-    }
-    if (headers['x-github-event'] !== 'push') {
-      // unhandled event
-      if (args.flags.verbose) {
-        if (headers['x-github-event'])
-          log.info(
-            `[WebHook] [${new Date().toISOString()}] unhandled event: ${headers['x-github-event']}`,
-          );
-        else
-          log.info(
-            `[WebHook] [${new Date().toISOString()}] no event in header`,
-          );
-      }
-      return;
-    }
-
-    const pushEvent = JSON.parse(body);
-    if (pushEvent.ref === `refs/heads/${MAIN_BRANCH_NAME}`) {
-      console.log(
-        `🆕 [WebHook] [${new Date().toISOString()}] ` +
-          `${pushEvent.commits.length} new commit(s) to ${pushEvent.repository.full_name}@${MAIN_BRANCH_NAME}`,
-      );
-      restart();
-    }
-  },
-}).catch(() => {
-  log.error('Event source connection failed');
-  process.exit(1);
-});
-
-// Main loop
-
-const KILL_TIMEOUT = 1000;
-
 /** @type {ReturnType<typeof spawn> | undefined} */
 let spawnResult;
-const killChildProcessIfNeeded = async () => {
-  if (!spawnResult) return;
-  if (spawnResult.child.exitCode !== null)
-    return log.info('child process had already exited.');
 
-  // `null` means it's still running, otherwise no need to kill it.
-  log.info('Killing child process');
-  const timeout = createTimeout(1000);
-  spawnResult.child.on('exit', timeout.cancel);
-
-  if (spawnResult.child.pid) {
-    await treeKill(spawnResult.child.pid);
-  } else {
-    spawnResult.child.kill();
-  }
-
-  const timeoutResult = await timeout.promise;
-  if (timeoutResult === 'timeout') {
-    throw new Error(
-      `Child process (PID ${spawnResult.child.pid}) did not die within ${KILL_TIMEOUT / 1000} second(s)`,
-    );
-  }
-};
-
+const KILL_TIMEOUT = 1000;
 const restart = async () => {
-  await killChildProcessIfNeeded();
+  await spawnResult?.kill(KILL_TIMEOUT);
 
   log.info(`Running "${kleur.bold().yellow('git pull')}"`);
   const gitPullExitCode = await spawn('git', ['pull']).promise;
@@ -139,7 +56,7 @@ const restart = async () => {
 
   log.info(
     `Running "${kleur.bold().yellow(packageManagerCommand + ' install')}"` +
-      (!args.flags.dev ? ' with NODE_ENV="production"' : ''),
+    (!args.flags.dev ? ' with NODE_ENV="production"' : ''),
   );
   const options = {
     env: !args.flags.dev
@@ -161,16 +78,30 @@ const restart = async () => {
   );
 };
 
-/**
- * @param {any} e
- */
+await connectToSmee({
+  eventSourceUrl: EVENT_SOURCE_URL,
+  onConnecting: ({ source }) =>
+    log.info(`[Event Source] Connecting to ${kleur.bold().yellow(source)}`),
+  onConnected: () =>
+    console.log(`✅ ${kleur.bold().green('[Event Source]')} Connected`),
+  onError: (err) => log.error('[Event Source]', err),
+  onEvent: createWebhookHandler({
+    githubWebhookSecret: GITHUB_WEBHOOK_SECRET,
+    mainBranchName: MAIN_BRANCH_NAME,
+    verbose: args.flags.verbose,
+    onPush: restart,
+  }),
+}).catch(() => {
+  log.error('Event source connection failed');
+  process.exit(1);
+});
+
+// Main loop
+
+/** @type {NodeJS.UncaughtExceptionListener & NodeJS.UnhandledRejectionListener} */
 const handleUnhandled = async (e) => {
   console.error(e);
-  if (spawnResult?.child.pid) {
-    await treeKill(spawnResult.child.pid);
-  } else {
-    spawnResult?.child.kill();
-  }
+  spawnResult?.kill();
   process.exit(1);
 };
 process.on('unhandledRejection', handleUnhandled);
