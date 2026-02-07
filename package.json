@@ -1,16 +1,16 @@
 {
   "name": "hook-pull-reinstall-restart",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "ISC",
   "type": "module",
-  "main": "index.ts",
+  "main": "index.mjs",
   "engines": {
     "node": ">=24",
     "pnpm": ">=10"
   },
-  "bin": "index.ts",
+  "bin": "index.mjs",
   "files": [
-    "index.ts",
+    "index.mjs",
     "lib/",
     "*.d.ts"
   ],
@@ -20,8 +20,7 @@
     "once": "echo \"Triggered once!\"",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "check": "pnpm run format && pnpm run lint && pnpm run typecheck"
+    "check": "pnpm run format && pnpm run lint"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

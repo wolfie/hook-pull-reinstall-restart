@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "noEmit": true,
     "strict": true,
-    "erasableSyntaxOnly": true,
-    "allowImportingTsExtensions": true
+    "checkJs": true,
+    "allowJs": true
   }
 }

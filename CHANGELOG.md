@@ -1,4 +1,4 @@
-# 1.0
+# 1.0.1
 
 ## Breaking Changes
 
@@ -9,7 +9,6 @@
 
 ## Features
 
-- Complete TypeScript rewrite using Node 24's native type stripping
 - Upgrade to ESLint 10 with flat config system
 - Add quality check npm scripts
 - Added Claude-related files
