@@ -94,9 +94,8 @@ The main orchestrator that:
 
 **Shell Usage:**
 
-- `USE_SHELL` constant (currently `true`) controls whether to spawn with shell
-- When shell is enabled, commands are passed as single strings
-- When disabled, uses parsed spawn args from `getScriptCommand()`
+- Start commands are always spawned with shell enabled
+- Commands are passed as single strings to the shell
 
 **Security:**
 

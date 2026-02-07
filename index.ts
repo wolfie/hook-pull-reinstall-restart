@@ -15,9 +15,6 @@ import util from 'util';
 import onFileChange from './lib/onFileChange.ts';
 import path from 'path';
 
-// Trying out whether a shell is a huge overhead.
-const USE_SHELL = true;
-
 const treeKill = util.promisify(_treeKill);
 
 const args = meow(
@@ -155,9 +152,7 @@ const restart = async () => {
 
   const startCommand = await getScriptCommand(START_SCRIPT);
   log.info(`Running "${kleur.bold().yellow(startCommand.original)}"`);
-  spawnResult = USE_SHELL
-    ? spawn(startCommand.original, undefined, { shell: true })
-    : spawn(...startCommand.spawnArgs);
+  spawnResult = spawn(startCommand.original, undefined, { shell: true });
   log.info(
     `Child process running on PID ${kleur.bold().yellow(spawnResult.child.pid ?? '[undefined]')}`,
   );
