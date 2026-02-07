@@ -3,7 +3,7 @@
 import getEnvs from './lib/getEnvs.mjs';
 import meow from 'meow';
 import kleur from 'kleur';
-import connectToSmee from './lib/smee/connectToEventSource.mjs';
+import connectToEventSource from './lib/smee/connectToEventSource.mjs';
 import spawn from './lib/spawn.mjs';
 import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
 import getScriptCommand from './lib/node/getScriptCommand.mjs';
@@ -77,7 +77,7 @@ const restart = async () => {
   );
 };
 
-await connectToSmee({
+await connectToEventSource({
   eventSourceUrl: EVENT_SOURCE_URL,
   onConnecting: ({ source }) =>
     log.info(`[Event Source] Connecting to ${kleur.bold().yellow(source)}`),
