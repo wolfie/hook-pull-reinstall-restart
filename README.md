@@ -11,7 +11,7 @@ This app runner
 
 ## Requirements
 
-- Node 20.10 or later
+- Node 24 or later
 - A cloned GitHub repository
 - `package.json` file with a `start` script that runs your project
 - A lockfile matching the `package.json`
