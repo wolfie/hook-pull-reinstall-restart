@@ -9,8 +9,7 @@ import getPackageManagerCommand from './lib/node/getPackageManagerCommand.mjs';
 import getScriptCommand from './lib/node/getScriptCommand.mjs';
 import * as log from './lib/log.mjs';
 import createWebhookHandler from './lib/github/createWebhookHandler.mjs';
-import onFileChange from './lib/onFileChange.mjs';
-import path from 'path';
+import runOnceScript from './lib/runOnceScript.mjs';
 
 const args = meow(
   `
@@ -96,7 +95,6 @@ await connectToSmee({
   process.exit(1);
 });
 
-// Main loop
 
 /** @type {NodeJS.UncaughtExceptionListener & NodeJS.UnhandledRejectionListener} */
 const handleUnhandled = async (e) => {
@@ -107,25 +105,5 @@ const handleUnhandled = async (e) => {
 process.on('unhandledRejection', handleUnhandled);
 process.on('uncaughtException', handleUnhandled);
 
-if (ONCE_SCRIPT) {
-  const file = path.resolve(process.cwd(), '.hprrrc');
-  if (args.flags.verbose)
-    log.info(
-      `Waiting for ${kleur.bold().yellow(file)} to change to run "${kleur.bold().yellow(ONCE_SCRIPT)}"...`,
-    );
-  onFileChange(file).then(async () => {
-    if (args.flags.verbose)
-      log.info(`Triggering "${kleur.bold().yellow(ONCE_SCRIPT)}" once`);
-
-    const onceCommand = await getScriptCommand(ONCE_SCRIPT);
-    log.info(`Running "${kleur.bold().yellow(onceCommand.original)}"`);
-    const onceSpawnResult = spawn(onceCommand.original, undefined, {
-      shell: true,
-    });
-    log.info(
-      `Child process running on PID ${kleur.bold().yellow(onceSpawnResult.child.pid ?? '[undefined]')}`,
-    );
-  });
-}
-
+if (ONCE_SCRIPT) runOnceScript(args.flags.verbose, ONCE_SCRIPT)
 restart();
