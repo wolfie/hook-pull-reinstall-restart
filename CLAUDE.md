@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Hook-Pull-Reinstall-Restart is a simple CI/CD runner for personal projects. It listens for GitHub webhook events (via smee.io), then automatically pulls the latest changes, reinstalls dependencies, and restarts the application. This tool is designed for running apps on home servers without the complexity of Kubernetes or elaborate CI/CD pipelines.
+Hook-Pull-Reinstall-Restart is a simple CI/CD runner for personal projects. It listens for GitHub webhook events (via an event source proxy like smee.io), then automatically pulls the latest changes, reinstalls dependencies, and restarts the application. This tool is designed for running apps on home servers without the complexity of Kubernetes or elaborate CI/CD pipelines.
 
 ## Development Commands
 
@@ -40,7 +40,7 @@ The main orchestrator that:
 
 1. Validates git availability and detects package manager
 2. Gets configuration (interactive prompts or environment variables)
-3. Connects to smee.io for webhook events
+3. Connects to event source for webhook events
 4. Implements the main restart loop: kill process → pull → install → start
 5. Handles `ONCE_SCRIPT` feature via file watching
 
@@ -61,8 +61,8 @@ The main orchestrator that:
 
 **`lib/smee/connectToSmee.ts`**
 
-- Connects to smee.io EventSource endpoint
-- Transforms smee.io events into webhook format (headers + body)
+- Connects to event source endpoint (default implementation uses smee.io)
+- Transforms event source messages into webhook format (headers + body)
 - Returns a promise that resolves when connected or rejects on error
 
 **`lib/getEnvs.ts`**
@@ -70,7 +70,7 @@ The main orchestrator that:
 - Handles two modes: interactive prompts or environment variables only
 - Loads `.hprrrc` file as dotenv source
 - Validates required environment variables
-- Can create new smee.io channels automatically
+- Can create new event source channels automatically (via smee.io by default)
 
 **`lib/github/createIsValidBody.ts`**
 
@@ -114,7 +114,7 @@ The main orchestrator that:
 
 Standard dotenv format containing:
 
-- `EVENT_SOURCE_URL`: smee.io channel URL
+- `EVENT_SOURCE_URL`: Event source URL (e.g., smee.io channel URL)
 - `GITHUB_WEBHOOK_SECRET`: webhook validation secret
 - `MAIN_BRANCH_NAME`: branch that triggers restarts
 - `START_SCRIPT`: script name from package.json (defaults to "start")

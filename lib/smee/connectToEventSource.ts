@@ -15,7 +15,7 @@ const onMessage = (onEvent: OnEvent) => async (msg: MessageEvent) => {
   onEvent(headers, body);
 };
 
-type ConnectToSmeeArgs = {
+type ConnectToEventSourceArgs = {
   eventSourceUrl: string;
   onConnecting?: (args: { source: string }) => void;
   onConnected?: () => void;
@@ -29,18 +29,15 @@ const connectToSmee = ({
   onConnected,
   onError,
   onEvent,
-}: ConnectToSmeeArgs) =>
+}: ConnectToEventSourceArgs) =>
   new Promise<void>((resolve, reject) => {
-    const source = eventSourceUrl.startsWith('https://smee.io')
-      ? eventSourceUrl
-      : `https://smee.io/${querystring.escape(eventSourceUrl)}`;
-    const events = new EventSource(source);
+    const events = new EventSource(eventSourceUrl);
 
-    if (!URL.canParse(source)) {
+    if (!URL.canParse(eventSourceUrl)) {
       return reject(new Error(`${eventSourceUrl} is not a valid URL`));
     }
 
-    onConnecting?.({ source });
+    onConnecting?.({ source: eventSourceUrl });
 
     // Reconnect immediately
     // EventSource doesn't officially have reconnectInterval but the library supports it
@@ -52,7 +49,9 @@ const connectToSmee = ({
     });
     events.addEventListener('error', (err: any) => {
       reject(err);
-      onError?.(err.code === 404 ? 'No such channel: ' + source : err);
+      onError?.(
+        err.code === 404 ? 'Event source not found: ' + eventSourceUrl : err,
+      );
     });
   });
 

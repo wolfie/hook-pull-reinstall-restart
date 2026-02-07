@@ -20,7 +20,7 @@ This app runner
 
 ## Get Started
 
-First, go to https://smee.io/ and press the "Start a new channel" button. Make note of the URL provided.
+First, set up an event source to receive GitHub webhooks. The easiest option is to go to https://smee.io/ and press the "Start a new channel" button. Make note of the URL provided.
 
 Then create a new webhook for your GitHub project with that URL. (Repository > Settings > Webhooks > Add webhook). Make sure that
 
@@ -28,14 +28,14 @@ Then create a new webhook for your GitHub project with that URL. (Repository > S
 - A secret is set, and
 - At least the `push` event is sent.
 
-Finally, you can run the command `npx hook-pull-reinstall-restart`, and enter the smee.io channel URL when prompted:
+Finally, you can run the command `npx hook-pull-reinstall-restart`, and enter the event source URL when prompted:
 
 ```
 > npx hook-pull-reinstall-restart
 ✔ Start script › start
 ✔ Script to run once (touch .hprrrc to trigger) › once
-✔ Do you have a Smee.io channel already? › Yes
-✔ Smee.io channel URL … https://smee.io/aBcDeF1234567890
+✔ Do you have an event source URL already? › Yes
+✔ Event source URL … https://smee.io/aBcDeF1234567890
 ✔ Github webhook secret … myProjectSecret123
 ✔ Main branch name … main
 ✔ Save answers? … yes
@@ -47,8 +47,8 @@ _Technically it doesn't matter if this command matches whichever package manager
 After this, the branch will be pulled, newest project dependencies will be installed, and the project started.
 
 ```
-✨ [Smee] Connecting to https://smee.io/aBcDeF1234567890
-✅ [Smee] Connected
+✨ [Event Source] Connecting to https://smee.io/aBcDeF1234567890
+✅ [Event Source] Connected
 ✨ Running "git pull"
 🔊  Already up to date.
 ✨ Running "pnpm install"
@@ -89,7 +89,7 @@ If the webhook is set up correctly, the next time any updates happen in the main
 
 The environment variables used are:
 
-- `EVENT_SOURCE_URL`: The HTTP(S) address to the (smee.io) service that sends the github webhook events
+- `EVENT_SOURCE_URL`: The HTTP(S) address to the event source service that proxies GitHub webhook events (e.g., smee.io)
 - `GITHUB_WEBHOOK_SECRET`: The [webhook's secret](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#creating-a-secret-token) string
 - `MAIN_BRANCH_NAME`: The name of the Git repository's main branch. This branch is what will trigger the cycle. Usually `master` or `main`.
 - _(Optional)_ `START_SCRIPT`: The script in `package.json` to run when starting your app. If not given, defaults to "`start`".

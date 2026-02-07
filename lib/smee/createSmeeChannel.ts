@@ -7,7 +7,7 @@ const createSmeeChannel = async (): Promise<string> => {
   });
   const address = response.headers.get('location');
   if (!address) {
-    log.error('Failed to create a new Smee.io channel');
+    log.error('Failed to create a new event source channel');
     process.exit(1);
   }
   return address;

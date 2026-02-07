@@ -47,10 +47,7 @@ const getOnlyEnvs = (): Envs => {
 
 const onCancel = () => process.exit(130);
 
-const askQuestions = async (
-  /** @deprecated */ SMEE_ID: string | undefined,
-  /** @deprecated */ GITHUB_PROJECT_SECRET: string | undefined,
-): Promise<Envs> => {
+const askQuestions = async (): Promise<Envs> => {
   const scriptChoices = await getScripts().then((scripts) =>
     Object.entries(scripts).map(
       ([name, cmd]): prompts.Choice => ({
@@ -104,16 +101,16 @@ const askQuestions = async (
       ? undefined
       : (onceScriptQuestion.script as string);
 
-  const smeeQuestion = await prompts(
+  const eventSourceQuestion = await prompts(
     {
       type: 'select',
-      message: 'Do you have a Smee.io channel already?',
+      message: 'Do you have an event source URL already?',
       name: 'createNew',
-      initial: SMEE_ID || process.env.EVENT_SOURCE_URL ? 1 : 0,
+      initial: process.env.EVENT_SOURCE_URL ? 1 : 0,
       choices: [
         {
           title: 'No',
-          description: 'One will be created for you',
+          description: 'One will be created for you (via smee.io)',
           value: true,
         },
         {
@@ -127,26 +124,22 @@ const askQuestions = async (
   );
 
   let EVENT_SOURCE_URL: string;
-  if (smeeQuestion.createNew) {
+  if (eventSourceQuestion.createNew) {
     EVENT_SOURCE_URL = await createSmeeChannel();
-    log.info(
-      'Created Smee.io channel ' + kleur.bold().yellow(EVENT_SOURCE_URL),
-    );
+    log.info('Created event source ' + kleur.bold().yellow(EVENT_SOURCE_URL));
   } else {
     const answers = await prompts(
       {
         type: 'text',
         name: 'EVENT_SOURCE_URL',
-        message: 'Smee.io channel URL',
-        initial: SMEE_ID
-          ? `https://smee.io/${SMEE_ID}`
-          : process.env.EVENT_SOURCE_URL,
+        message: 'Event source URL',
+        initial: process.env.EVENT_SOURCE_URL,
         format: (value: string) => value.trim(),
         validate: (value: string) =>
           value.trim().length === 16
-            ? 'Give the entire Smee.io URI'
+            ? 'Give the entire event source URL'
             : !value.trim().toLowerCase().startsWith('http')
-              ? 'Give the entire URI'
+              ? 'Give the entire URL'
               : true,
       },
       { onCancel },
@@ -161,7 +154,7 @@ const askQuestions = async (
           type: 'text',
           name: 'GITHUB_WEBHOOK_SECRET',
           message: 'Github webhook secret',
-          initial: GITHUB_PROJECT_SECRET || process.env.GITHUB_WEBHOOK_SECRET,
+          initial: process.env.GITHUB_WEBHOOK_SECRET,
           format: (value: string) => value.trim(),
           validate: (value: string) => value.trim().length > 0,
         },
@@ -212,31 +205,15 @@ const askQuestions = async (
 const getEnvs = async (forceInteractive: boolean): Promise<Envs> => {
   configDotenv({ path: DOTENV_PATH, quiet: true });
 
-  /** @deprecated */
-  const SMEE_ID = process.env.SMEE_ID;
-  if (SMEE_ID) {
-    log.error(
-      `Env ${kleur.bold().yellow('SMEE_ID')} is superceded by ${kleur.bold().yellow('EVENT_SOURCE_URL')}`,
-    );
-  }
-
-  /** @deprecated */
-  const GITHUB_PROJECT_SECRET = process.env.GITHUB_PROJECT_SECRET;
-  if (GITHUB_PROJECT_SECRET) {
-    log.error(
-      `Env ${kleur.bold().yellow('GITHUB_PROJECT_SECRET')} is superceded by ${kleur.bold().yellow('GITHUB_WEBHOOK_SECRET')}`,
-    );
-  }
-
   if (forceInteractive) {
-    return askQuestions(SMEE_ID, GITHUB_PROJECT_SECRET);
+    return askQuestions();
   }
 
   try {
     return getOnlyEnvs();
   } catch (error) {
     log.info('Falling back to interactive prompts');
-    return askQuestions(SMEE_ID, GITHUB_PROJECT_SECRET);
+    return askQuestions();
   }
 };
 

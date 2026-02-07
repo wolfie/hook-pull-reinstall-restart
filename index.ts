@@ -3,7 +3,7 @@
 import getEnvs from './lib/getEnvs.ts';
 import meow from 'meow';
 import kleur from 'kleur';
-import connectToSmee from './lib/smee/connectToSmee.ts';
+import connectToSmee from './lib/smee/connectToEventSource.ts';
 import spawn from './lib/spawn.ts';
 import getPackageManagerCommand from './lib/node/getPackageManagerCommand.ts';
 import createTimeout from './lib/createTimeout.ts';
@@ -55,10 +55,10 @@ const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
 await connectToSmee({
   eventSourceUrl: EVENT_SOURCE_URL,
   onConnecting: ({ source }) =>
-    log.info(`[Smee] Connecting to ${kleur.bold().yellow(source)}`),
+    log.info(`[Event Source] Connecting to ${kleur.bold().yellow(source)}`),
   onConnected: () =>
-    console.log(`✅ ${kleur.bold().green('[Smee]')} Connected`),
-  onError: (err) => log.error('[Smee]', err),
+    console.log(`✅ ${kleur.bold().green('[Event Source]')} Connected`),
+  onError: (err) => log.error('[Event Source]', err),
   onEvent: (headers, body) => {
     if (args.flags.verbose)
       log.info(`[WebHook] [${new Date().toISOString()}] ${body}`);
@@ -99,7 +99,7 @@ await connectToSmee({
     }
   },
 }).catch(() => {
-  log.error('Smee failed');
+  log.error('Event source connection failed');
   process.exit(1);
 });
 
