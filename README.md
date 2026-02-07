@@ -79,8 +79,8 @@ If the webhook is set up correctly, the next time any updates happen in the main
 ```
 --envs, -e
     Skip interactive prompts on startup and use environment variables instead
---prod, -p
-    Omit devDependencies during package installation
+--dev, -d
+    Include devDependencies during package installation (default: production mode)
 --verbose, -v
     Increase logging
 ```

@@ -24,15 +24,15 @@ const args = meow(
   `
     --envs, -e
         Skip interactive prompts on startup and use environment variables instead
-    --prod, -p
-        Omit devDependencies during package installation
+    --dev, -d
+        Include devDependencies during package installation (default: production mode)
     --verbose, -v
         Increase logging`,
   {
     importMeta: import.meta,
     flags: {
       envs: { type: 'boolean', shortFlag: 'e', default: false },
-      prod: { type: 'boolean', shortFlag: 'p', default: false },
+      dev: { type: 'boolean', shortFlag: 'd', default: false },
       verbose: { type: 'boolean', shortFlag: 'v', default: false },
     },
   },
@@ -141,10 +141,10 @@ const restart = async () => {
 
   log.info(
     `Running "${kleur.bold().yellow(packageManagerCommand + ' install')}"` +
-      (args.flags.prod ? ' with NODE_ENV="production"' : ''),
+      (!args.flags.dev ? ' with NODE_ENV="production"' : ''),
   );
   const options = {
-    env: args.flags.prod ? { NODE_ENV: 'production' as const } : undefined,
+    env: !args.flags.dev ? { NODE_ENV: 'production' as const } : undefined,
   };
   const installExitCode = await spawn(
     packageManagerCommand,
