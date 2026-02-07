@@ -77,8 +77,8 @@ If the webhook is set up correctly, the next time any updates happen in the main
 ## CLI Options
 
 ```
---envs, -e
-    Skip interactive prompts on startup and use environment variables instead
+--interactive, -i
+    Force interactive prompts on startup (default: use .hprrrc or environment variables)
 --dev, -d
     Include devDependencies during package installation (default: production mode)
 --verbose, -v
@@ -97,7 +97,7 @@ The environment variables used are:
 
 The `ONCE_SCRIPT` feature can be used to e.g. launch a browser to view a website, but only once the first build is completed. It might be undesirable to always launch a new browser when the project gets relaunched. An easy way to trigger this is to execute `touch .hprrrc` in your project's build script.
 
-These values are written into `.hprrrc` by the interactive prompt if asked to. If the file exists, the script will use the values from there as defaults for environment variables (convenient with the `--envs` flag).
+These values are written into `.hprrrc` by the interactive prompt if asked to. If the file exists, the script will use those values automatically (without prompting). Use the `--interactive` flag to force prompts even when `.hprrrc` exists.
 
 ## Things of Note
 

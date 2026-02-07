@@ -22,8 +22,8 @@ const treeKill = util.promisify(_treeKill);
 
 const args = meow(
   `
-    --envs, -e
-        Skip interactive prompts on startup and use environment variables instead
+    --interactive, -i
+        Force interactive prompts on startup (default: use .hprrrc or environment variables)
     --dev, -d
         Include devDependencies during package installation (default: production mode)
     --verbose, -v
@@ -31,7 +31,7 @@ const args = meow(
   {
     importMeta: import.meta,
     flags: {
-      envs: { type: 'boolean', shortFlag: 'e', default: false },
+      interactive: { type: 'boolean', shortFlag: 'i', default: false },
       dev: { type: 'boolean', shortFlag: 'd', default: false },
       verbose: { type: 'boolean', shortFlag: 'v', default: false },
     },
@@ -49,7 +49,7 @@ const {
   EVENT_SOURCE_URL,
   START_SCRIPT,
   ONCE_SCRIPT,
-} = await getEnvs(args.flags.envs);
+} = await getEnvs(args.flags.interactive);
 
 const isValidBody = createIsValidBody(GITHUB_WEBHOOK_SECRET);
 await connectToSmee({

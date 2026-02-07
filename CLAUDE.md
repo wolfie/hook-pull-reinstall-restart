@@ -26,7 +26,7 @@ npx tsc --noEmit
 node index.ts
 # or with flags:
 node index.ts --verbose
-node index.ts --envs --prod
+node index.ts --interactive --dev
 ```
 
 **Testing the tool with itself:**
@@ -106,10 +106,9 @@ The main orchestrator that:
 
 **Configuration Priority:**
 
-1. Command-line flags (`--envs`, `--prod`, `--verbose`)
-2. Environment variables
-3. `.hprrrc` file (loaded via dotenv)
-4. Interactive prompts (fallback)
+1. Command-line flags (`--interactive`, `--dev`, `--verbose`)
+2. `.hprrrc` file (loaded via dotenv) and environment variables
+3. Interactive prompts (fallback when `.hprrrc` is missing or `--interactive` is used)
 
 ## Configuration File (`.hprrrc`)
 

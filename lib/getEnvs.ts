@@ -21,8 +21,7 @@ const DEFAULT_START_SCRIPT = 'start';
 
 const assert = (envKey: string) => {
   if (!process.env[envKey]) {
-    log.error(`${kleur.bold().yellow(envKey)} environment variable not set`);
-    process.exit(1);
+    throw new Error(`${envKey} environment variable not set`);
   }
 };
 
@@ -210,8 +209,8 @@ const askQuestions = async (
   };
 };
 
-const getEnvs = async (useEnvs: boolean): Promise<Envs> => {
-  configDotenv({ path: DOTENV_PATH });
+const getEnvs = async (forceInteractive: boolean): Promise<Envs> => {
+  configDotenv({ path: DOTENV_PATH, quiet: true });
 
   /** @deprecated */
   const SMEE_ID = process.env.SMEE_ID;
@@ -229,7 +228,16 @@ const getEnvs = async (useEnvs: boolean): Promise<Envs> => {
     );
   }
 
-  return useEnvs ? getOnlyEnvs() : askQuestions(SMEE_ID, GITHUB_PROJECT_SECRET);
+  if (forceInteractive) {
+    return askQuestions(SMEE_ID, GITHUB_PROJECT_SECRET);
+  }
+
+  try {
+    return getOnlyEnvs();
+  } catch (error) {
+    log.info('Falling back to interactive prompts');
+    return askQuestions(SMEE_ID, GITHUB_PROJECT_SECRET);
+  }
 };
 
 export default getEnvs;
